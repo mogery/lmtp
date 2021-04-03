@@ -1,0 +1,22 @@
+{
+  "name": "lmtp",
+  "version": "1.0.0",
+  "description": "Lime Machine TransPiler",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mogery/lmtp.git"
+  },
+  "author": "mogery",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mogery/lmtp/issues"
+  },
+  "homepage": "https://github.com/mogery/lmtp#readme",
+  "dependencies": {
+    "acorn": "^8.1.0"
+  }
+}
