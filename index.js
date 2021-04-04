@@ -480,7 +480,7 @@ var nodeHandlers = {
             // get left twice
             getCompStack();
             pn(0);
-            pi(true, 7);
+            pi(push, 7);
             getCompStack();
             pn(0);
             pi(true, 7);
@@ -494,7 +494,7 @@ var nodeHandlers = {
 
             // consume remaining left, push right to stack
             pi(false, 13);
-            handleNode(n.right, true, true);
+            handleNode(n.right, push, true);
 
             codestream[jmpMarker] += codestream.length;
 
