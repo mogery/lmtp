@@ -397,15 +397,7 @@ var nodeHandlers = {
         // []['constructor'](...n.elements)
         pnull();
         n.elements.forEach(x => handleNode(x, true, true));
-        pnull();
-        ps("[]");
-        pi(true, 4);
-        ps("JSON");
-        pi(true, 7);
-        ps("parse");
-        pi(true, 7);
-        pn(2);
-        pi(true, 9);
+        getCompStack();
         ps("constructor");
         pi(true, 7);
         pn(n.elements.length + 1);
