@@ -378,6 +378,9 @@ var nodeHandlers = {
         pi(false, 8);
     },
     "AssignmentExpression": function AssignmentExpression(n, push) {
+        if (n.operator != "=") {
+            throw new Error("Assignment operator " + n.operator + " is not supported yet.");
+        }
         if (n.left.type == "Identifier") {
             getVarStore();
             handleNode(n.left, true, false);
