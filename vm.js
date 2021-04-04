@@ -22,7 +22,8 @@ function vm(c, input, opts = {}) {
         x => !x, // 13
         (x, y) => x > y, // 14
         (x, y) => x == y, // 15
-        x => typeof x // 16
+        x => typeof x, // 16
+        x => delete x, // 17
     ];
 
     for (i = 0; !h; i++) {
