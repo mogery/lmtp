@@ -27,7 +27,7 @@ const s = [], f = [
     x => typeof x // 16
 ];
 
-for (i = 0; !h; i++) {
+for (i = 0; !h && i < c.length; i++) {
     const e = c[i];
 
     if (e >= 50) {
