@@ -541,8 +541,6 @@ var nodeHandlers = {
         pn(condMarker);
         pi(false, 1);
         codestream[jmpMarker] += codestream.length;
-
-        console.log(n)
     }
 }
 
