@@ -97,6 +97,34 @@ function getCompStack() {
     pi(true, 6);
 }
 
+var selfVMExists = false;
+
+function setupSelfVM() {
+    selfVMExists = true;
+    pnull();
+    ps("c,input");
+    ps(fs.readFileSync("tinyvm.js", "utf8").trim());
+    pi(true, 4);
+    ps("Math");
+    pi(true, 7);
+    ps("pow");
+    pi(true, 7);
+    ps("constructor");
+    pi(true, 7);
+    pn(3);
+    pi(true, 9);
+}
+
+function getSelfVM() {
+    if (!selfVMExists) throw new Error("IVM is not set up. Pass --ivm");
+    pn(2);
+    pi(true, 6);
+}
+
+if (process.argv.includes("--ivm")) {
+    setupSelfVM();
+}
+
 var nodeHandlers = {
     "Program": function Program(n) {
         for (var x of n.body) {
@@ -512,6 +540,8 @@ var handleNode = (n, ...args) => {
 }
 
 handleNode(ast);
+
+console.error("Size of codestream:", codestream.length);
 
 if (process.argv.includes("-r")) {
     var vm = require("./vm");
