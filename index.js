@@ -7,24 +7,12 @@ if (!file) {
     process.exit(1);
 }
 
-var streams = {
-    main: []
-}
-var activeStream = "main";
-var switchStream = x => {
-    if (!streams[x]) streams[x] = [];
-    activeStream = x;
-}
-var mergeStream = (into = "main") => {
-    streams[into] = streams[into].concat(streams[activeStream]);
-    delete streams[into];
-    activeStream = into;
-}
+var codestream = [];
 
 var contents = fs.readFileSync(file, "utf8");
 var ast = acorn.parse(contents, {ecmaVersion: 2020, allowReturnOutsideFunction: true});
 
-var pi = (push, x) => streams[activeStream].push((push ? 0 : 25) + x);
+var pi = (push, x) => codestream.push((push ? 0 : 25) + x);
 var pnull = () => pi(true, 3);
 var pn = x => {
     if (isNaN(x)) {
@@ -37,7 +25,7 @@ var pn = x => {
             pi(true, 12); // negate
         }
     } else {
-        streams[activeStream].push(50 + x);
+        codestream.push(50 + x);
     }
 }
 var ps = x => {
@@ -60,7 +48,7 @@ var ps = x => {
     ps("constructor");
     pi(true, 7);
     pi(true, 8);
-    
+
     // TODO: Expand with other useful globals, like Array ([].constructor)
 })();
 var getVarStore = () => {
@@ -195,6 +183,29 @@ var nodeHandlers = {
             pi(push, 13);
         }
         console.error("DBG", n);
+    },
+    "IfStatement": function IfStatement(n, push) {
+        handleNode(n.test, true);
+        pi(true, 13);
+        var jumpAmtMarker = codestream.length, altJumpAmtMarker;
+        pn(codestream.length + 2);
+        pi(false, 2);
+        var startMarker = codestream.length;
+        handleNode(n.consequent, push);
+        if (n.alternate) {
+            altJumpAmtMarker = codestream.length;
+            pn(codestream.length + 2);
+            pi(false, 1);
+            codestream[jumpAmtMarker] += codestream.length - startMarker;
+            var startMarker = codestream.length;
+            handleNode(n.alternate, push);
+            codestream[altJumpAmtMarker] += codestream.length - startMarker;
+        } else {
+            codestream[jumpAmtMarker] += codestream.length - startMarker;
+        }
+    },
+    "BlockStatement": function(n, push) {
+        n.body.forEach(x => handleNode(x, push));
     }
 }
 
@@ -211,7 +222,7 @@ handleNode(ast);
 
 if (process.argv.includes("-r")) {
     var vm = require("./vm");
-    console.log(vm(streams.main));
+    console.log(vm(codestream));
 } else {
-    console.log(JSON.stringify(streams.main));
+    console.log(JSON.stringify(codestream));
 }
