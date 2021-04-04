@@ -16,8 +16,8 @@ var pi = (push, x) => codestream.push((push ? 0 : 25) + x);
 var pnull = () => pi(true, 3);
 var pn = x => {
     if (isNaN(x)) {
-        // -"\0"
-        ps("\0"); pi(true, 12);
+        // -global
+        pi(true, 4); pi(true, 12);
     } else if (!isFinite(x)) {
         // Math.pow(10, 1000)
         pnull(); pn(10); pn(1000); pi(true, 4); ps("Math"); pi(true, 7); ps("pow"); pi(true, 7); pn(3); pi(true, 9);
@@ -48,6 +48,11 @@ var pb = x => {
         pn(1);
     }
     pi(true, 13);
+}
+var pu = () => {
+    getCompStack();
+    ps("");
+    pi(true, 7);
 }
 
 (function setupVarStore() {
