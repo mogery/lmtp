@@ -97,10 +97,10 @@ function getCompStack() {
     pi(true, 6);
 }
 
-var selfVMExists = false;
+var selfVMMode;
 
 function setupSelfVM() {
-    selfVMExists = true;
+    selfVMMode = "tinyvm";
     pnull();
     ps("c,input");
     ps(fs.readFileSync("tinyvm.js", "utf8").trim());
@@ -116,13 +116,26 @@ function setupSelfVM() {
 }
 
 function getSelfVM() {
-    if (!selfVMExists) throw new Error("IVM is not set up. Pass --ivm");
-    pn(2);
-    pi(true, 6);
+    if (selfVMMode == "tinyvm") {
+        pn(2);
+        pi(true, 6);
+    } else if (selfVMMode.startsWith("global:")) {
+        pi(true, 4);
+        ps(selfVMMode.slice("global:".length));
+        pi(true, 7);
+    } else {
+        throw new Error("IVM is not set up. Pass --ivm");
+    }
 }
 
 if (process.argv.includes("--ivm")) {
     setupSelfVM();
+} else {
+    var f = process.argv.find(x => x.startsWith("--gvm="));
+    if (f) {
+        var name = f.slice("--gvm=".length);
+        selfVMMode = "global:" + name;
+    }
 }
 
 var nodeHandlers = {
@@ -541,6 +554,25 @@ var nodeHandlers = {
         pn(condMarker);
         pi(false, 1);
         codestream[jmpMarker] += codestream.length;
+    },
+    "WhileStatement": function WhileStatement(n) {
+        var startMarker = codestream.length;
+        handleNode(n.test, true);
+        pi(true, 13);
+        var jmpMarker = codestream.length;
+        pn(0);
+        pi(false, 2);
+        handleNode(n.body);
+        pn(startMarker);
+        pi(false, 1);
+        codestream[jmpMarker] += codestream.length;
+    },
+    "DoWhileStatement": function DoWhileStatement(n) {
+        var startMarker = codestream.length;
+        handleNode(n.body);
+        handleNode(n.test, true);
+        pn(startMarker);
+        pi(false, 2);
     }
 }
 
