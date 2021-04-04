@@ -465,6 +465,50 @@ var nodeHandlers = {
     },
     "BlockStatement": function(n, push) {
         n.body.forEach(x => handleNode(x, push));
+    },
+    "LogicalExpression": function(n, push) {
+        if (n.operator == "||" || n.operator == "&&") {
+            // Push x to compStack
+            getCompStack();
+            handleNode(n.left, true, true);
+            getCompStack();
+            ps("unshift");
+            pi(true, 7);
+            pn(2);
+            pi(false, 9);
+
+            // get left twice
+            getCompStack();
+            pn(0);
+            pi(true, 7);
+            getCompStack();
+            pn(0);
+            pi(true, 7);
+
+            if (n.operator == "&&") pi(true, 13);
+
+            // if left is falsey/truthy
+            var jmpMarker = codestream.length;
+            pn(0);
+            pi(false, 2);
+
+            // consume remaining left, push right to stack
+            pi(false, 13);
+            handleNode(n.right, true, true);
+
+            codestream[jmpMarker] += codestream.length;
+
+            getCompStack();
+            getCompStack();
+            ps("shift");
+            pi(true, 7);
+            pn(1);
+            pi(false, 9);
+        } else {
+            throw new Error("Logical operator " + x.operator + " is unsupported.");
+        }
+
+        console.log(n);
     }
 }
 
