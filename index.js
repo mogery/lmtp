@@ -82,7 +82,7 @@ var nodeHandlers = {
         //pi(true, 3); // Push null for this, TODO: push parent
         var argCnt = n.arguments.length;
         for (var arg of n.arguments) {
-            handleNode(arg, true);
+            handleNode(arg, true, true);
         }
 
         handleNode(n.callee, true, true);
