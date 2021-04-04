@@ -1,5 +1,6 @@
 var fs = require("fs");
 var acorn = require("acorn");
+var UgilfyJS = require("uglify-js");
 
 var file = process.argv[2];
 if (!file) {
@@ -105,10 +106,10 @@ function getCompStack() {
 var selfVMMode;
 
 function setupSelfVM() {
-    selfVMMode = "tinyvm";
+    selfVMMode = "funcvm";
     pnull();
     ps("c,input");
-    ps(fs.readFileSync("tinyvm.js", "utf8").trim());
+    ps(UgilfyJS.minify(fs.readFileSync("funcvm.js", "utf8").trim()));
     pi(true, 4);
     ps("Math");
     pi(true, 7);
@@ -121,7 +122,7 @@ function setupSelfVM() {
 }
 
 function getSelfVM() {
-    if (selfVMMode == "tinyvm") {
+    if (selfVMMode == "funcvm") {
         pn(2);
         pi(true, 6);
     } else if (selfVMMode.startsWith("global:")) {
@@ -420,7 +421,11 @@ var nodeHandlers = {
     "VariableDeclarator": function VariableDeclarator(n) {
         getVarStore();
         handleNode(n.id, true, false);
-        handleNode(n.init, true);
+        if (n.init) {
+            handleNode(n.init, true);
+        } else {
+            pu();
+        }
         pi(false, 8);
     },
     "AssignmentExpression": function AssignmentExpression(n, push) {
