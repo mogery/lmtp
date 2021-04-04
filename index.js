@@ -24,7 +24,7 @@ var mergeStream = (into = "main") => {
 var contents = fs.readFileSync(file, "utf8");
 var ast = acorn.parse(contents, {ecmaVersion: 2020, allowReturnOutsideFunction: true});
 
-var pi = (push, x) => strams[activeStream].push((push ? 0 : 25) + x);
+var pi = (push, x) => streams[activeStream].push((push ? 0 : 25) + x);
 var pnull = () => pi(true, 3);
 var pn = x => {
     if (isNaN(x)) {
@@ -74,7 +74,7 @@ var nodeHandlers = {
         pi(push, 0);
     },
     "CallExpression": function CallExpression(n, push) {
-        if (n.callee.type == "MemberExpression") { 
+        if (n.callee.type == "MemberExpression") {
             handleNode(n.callee.object, true, true);
         } else {
             getVarStore();
