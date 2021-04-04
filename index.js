@@ -3,7 +3,7 @@ var acorn = require("acorn");
 
 var file = process.argv[2];
 if (!file) {
-    console.log("Usage: " + process.argv.join(" ") + " <js file>");
+    console.error("Usage: " + process.argv.join(" ") + " <js file>");
     process.exit(1);
 }
 
@@ -507,8 +507,6 @@ var nodeHandlers = {
         } else {
             throw new Error("Logical operator " + x.operator + " is unsupported.");
         }
-
-        console.log(n);
     }
 }
 
