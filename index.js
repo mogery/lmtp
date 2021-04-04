@@ -53,6 +53,7 @@ var ps = x => {
 
 (function setupVarStore() {
     pi(true, 4);
+    // TODO: Expand with other useful globals, like Array ([].constructor) or Object ({}.constructor)
 })();
 var getVarStore = () => {
     // s[0]
@@ -74,7 +75,7 @@ var nodeHandlers = {
         pi(push, 0);
     },
     "CallExpression": function CallExpression(n, push) {
-        if (n.callee.type == "MemberExpression") { 
+        if (n.callee.type == "MemberExpression") {
             handleNode(n.callee.object, true, true);
         } else {
             getVarStore();
@@ -200,4 +201,9 @@ var handleNode = (n, ...args) => {
 
 handleNode(ast);
 
-console.log(JSON.stringify(streams.main));
+if (process.argv.includes("-r")) {
+    var vm = require("./vm");
+    console.log(vm(streams.main));
+} else {
+    console.log(JSON.stringify(streams.main));
+}
