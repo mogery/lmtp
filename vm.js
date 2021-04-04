@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// Lime Machine
+// Lime Extended Machine
 // Original code by ast
-// Extended/modularized by mogery
+// Extended by mogery
 
 function vm(c, input, opts = {}) {
-    let r, i;
+    let r, i, h;
     const s = [], f = [
         x => r = x, // 0
         x => i = x - 1, // 1
@@ -25,7 +25,7 @@ function vm(c, input, opts = {}) {
         x => typeof x // 16
     ];
 
-    for (i = 0; !r; i++) {
+    for (i = 0; !h; i++) {
         const e = c[i];
 
         if (e >= 50) {
@@ -36,6 +36,7 @@ function vm(c, input, opts = {}) {
         const p = f[e % 25];
         if (opts.debug) console.error("[DEBUG]", e % 25, "(" + e + ")", s);
         const o = p(...s.splice(s.length - p.length));
+        if (e % 25 == 0) h = true;
         if (e < 25) s.push(o);
     }
 
