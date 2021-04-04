@@ -53,7 +53,15 @@ var ps = x => {
 
 (function setupVarStore() {
     pi(true, 4);
-    // TODO: Expand with other useful globals, like Array ([].constructor) or Object ({}.constructor)
+
+    // Object polyfill
+    ps("Object");
+    pi(true, 4);
+    ps("constructor");
+    pi(true, 7);
+    pi(true, 8);
+    
+    // TODO: Expand with other useful globals, like Array ([].constructor)
 })();
 var getVarStore = () => {
     // s[0]
