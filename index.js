@@ -376,7 +376,7 @@ var nodeHandlers = {
             if (n.operator == "+") pi(push, 10);
             else if (n.operator == "-") {
                 // x + (-y)
-                pi(true, 13);
+                pi(true, 12);
                 pi(push, 10);
             }
             else if (n.operator == "*") pi(push, 11);
@@ -527,6 +527,22 @@ var nodeHandlers = {
         } else {
             throw new Error("Logical operator " + x.operator + " is unsupported.");
         }
+    },
+    "ForStatement": function ForStatement(n) {
+        handleNode(n.init);
+        var condMarker = codestream.length;
+        handleNode(n.test, true);
+        pi(true, 13);
+        var jmpMarker = codestream.length;
+        pn(0);
+        pi(false, 2);
+        handleNode(n.body);
+        handleNode(n.update);
+        pn(condMarker);
+        pi(false, 1);
+        codestream[jmpMarker] += codestream.length;
+
+        console.log(n)
     }
 }
 
