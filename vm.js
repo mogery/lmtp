@@ -3,7 +3,7 @@
 // Original code by ast
 // Minified/modularized by mogery
 
-function vm(c, input) {
+function vm(c, input, opts = {}) {
     let r, i;
     const s = [], f = [
         x => r = x, // 0
@@ -33,7 +33,9 @@ function vm(c, input) {
             continue;
         }
 
-        const p = f[e % 25], o = p(...s.splice(s.length - p.length));
+        const p = f[e % 25];
+        if (opts.debug) console.error("[DEBUG]", e % 25, "(" + e + ")", s);
+        const o = p(...s.splice(s.length - p.length));
         if (e < 25) s.push(o);
     }
 
