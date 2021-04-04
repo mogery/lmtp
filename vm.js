@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Lime Machine
 // Original code by ast
-// Minified/modularized by mogery
+// Extended/modularized by mogery
 
 function vm(c, input, opts = {}) {
     let r, i;

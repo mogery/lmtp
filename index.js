@@ -24,6 +24,9 @@ var pn = x => {
         if (x < 0) {
             pi(true, 12); // negate
         }
+    } else if (x < 0) {
+        pn(Math.abs(x));
+        pi(true, 12);
     } else {
         codestream.push(50 + x);
     }
@@ -38,6 +41,14 @@ var ps = x => {
     pn(ccarr.length + 1);
     pi(true, 9);
 }
+var pb = x => {
+    if (x) {
+        pn(0);
+    } else {
+        pn(1);
+    }
+    pi(true, 13);
+}
 
 (function setupVarStore() {
     pi(true, 4);
@@ -49,11 +60,40 @@ var ps = x => {
     pi(true, 7);
     pi(true, 8);
 
+    // Array polyfill
+    ps("Array");
+    pnull();
+    ps("[]");
+    pi(true, 4);
+    ps("JSON");
+    pi(true, 7);
+    ps("parse");
+    pi(true, 7);
+    pn(2);
+    pi(true, 9);
+    ps("constructor");
+    pi(true, 7);
+    pi(true, 8);
+
     // TODO: Expand with other useful globals, like Array ([].constructor)
 })();
 var getVarStore = () => {
     // s[0]
     pn(0);
+    pi(true, 6);
+}
+
+(function setupCompStack() {
+    pnull();
+    getVarStore();
+    ps("Array");
+    pi(true, 7);
+    pn(1);
+    pi(true, 9);
+})();
+
+function getCompStack() {
+    pn(1);
     pi(true, 6);
 }
 
@@ -110,12 +150,223 @@ var nodeHandlers = {
         }
     },
     "BinaryExpression": function BinaryExpression(n, push) {
-        handleNode(n.left, true, true);
-        handleNode(n.right, true, true);
-        if (n.operator == "+") pi(push, 10);
-        if (n.operator == "*") pi(push, 11);
-        if (n.operator == ">") pi(push, 14);
-        if (n.operator == "==") pi(push, 15);
+        if (n.operator == "/") {
+            // x * Math.pow(y, -1)
+            handleNode(n.left, true, true);
+            pnull();
+            handleNode(n.right, true, true);
+            pn(-1);
+            pi(true, 4);
+            ps("Math");
+            pi(true, 7);
+            ps("pow");
+            pi(true, 7);
+            pn(3);
+            pi(true, 9);
+            pi(push, 11);
+        }
+        else if (n.operator == "%") {
+            // Push operands to compStack
+            getCompStack();
+            handleNode(n.left, true, true);
+            handleNode(n.right, true, true);
+            getCompStack();
+            ps("unshift");
+            pi(true, 7);
+            pn(3);
+            pi(false, 9);
+
+            // cs.unshift(cs[0]/cs[1])
+            getCompStack();
+            getCompStack();
+            pn(0);
+            pi(true, 7);
+            pnull();
+            getCompStack();
+            pn(1);
+            pi(true, 7);
+            pn(-1);
+            pi(true, 4);
+            ps("Math");
+            pi(true, 7);
+            ps("pow");
+            pi(true, 7);
+            pn(3);
+            pi(true, 9);
+            pi(true, 11);
+            getCompStack();
+            ps("unshift");
+            pi(true, 7);
+            pn(2);
+            pi(false, 9);
+
+            // cs[0]
+            getCompStack();
+            pn(0);
+            pi(true, 7);
+
+            // Math.floor(cs[0])
+            pnull();
+            getCompStack();
+            pn(0);
+            pi(true, 7);
+            pi(true, 4);
+            ps("Math");
+            pi(true, 7);
+            ps("floor");
+            pi(true, 7);
+            pn(2);
+            pi(true, 9);
+
+            // (cs[0] + (-cs[0])) * y
+            pi(true, 12);
+            pi(true, 10);
+            getCompStack();
+            pn(2);
+            pi(true, 7);
+            pi(push, 11);
+
+            // Remove operands from compStack
+            getCompStack();
+            pn(0);
+            pn(3);
+            getCompStack();
+            ps("splice");
+            pi(true, 7);
+            pn(3);
+            pi(false, 9);
+        }
+        else if (n.operator == "<" || n.operator == ">=") {
+            // Push operands to compStack
+            getCompStack();
+            handleNode(n.left, true, true);
+            handleNode(n.right, true, true);
+            getCompStack();
+            ps("unshift");
+            pi(true, 7);
+            pn(3);
+            pi(false, 9);
+            
+            // Fetch operands from compStack
+            getCompStack();
+            pn(0);
+            pi(true, 7);
+            getCompStack();
+            pn(1);
+            pi(true, 7);
+
+            // x > y
+            pi(true, 14);
+
+            // Fetch operands from compStack
+            getCompStack();
+            pn(0);
+            pi(true, 7);
+            getCompStack();
+            pn(1);
+            pi(true, 7);
+
+            // x == y
+            pi(true, 15);
+
+            pi(true, 10);
+            pn(0);
+            if (n.operator == "<") { // !(x > y && x == y)
+                pi(push, 15);
+            } else { // x > y || x == y
+                pi(true, 15);
+                pi(push, 13)
+            }
+
+            // Remove operands from compStack
+            getCompStack();
+            pn(0);
+            pn(2);
+            getCompStack();
+            ps("splice");
+            pi(true, 7);
+            pn(3);
+            pi(false, 9);
+        }
+        else if (n.operator == "===" || n.operator == "!==") {
+            // Push operands to compStack
+            getCompStack();
+            handleNode(n.left, true, true);
+            handleNode(n.right, true, true);
+            getCompStack();
+            ps("unshift");
+            pi(true, 7);
+            pn(3);
+            pi(false, 9);
+            
+            // Fetch operands from compStack
+            getCompStack();
+            pn(0);
+            pi(true, 7);
+            pi(true, 16); // typeof x
+            getCompStack();
+            pn(1);
+            pi(true, 7);
+            pi(true, 16); // typeof y
+
+            // typeof x == typeof y
+            pi(true, 15);
+
+            // Fetch operands from compStack
+            getCompStack();
+            pn(0);
+            pi(true, 7);
+            getCompStack();
+            pn(1);
+            pi(true, 7);
+
+            // x == y
+            pi(true, 15);
+
+            pi(true, 10);
+            pn(2);
+            if (n.operator == "===") { // (typeof x == typeof y && x == y)
+                pi(push, 15);
+            } else { // typeof x != typeof y || x != y
+                pi(true, 15);
+                pi(push, 13);
+            }
+
+            // Remove operands from compStack
+            getCompStack();
+            pn(0);
+            pn(2);
+            getCompStack();
+            ps("splice");
+            pi(true, 7);
+            pn(3);
+            pi(false, 9);
+        }
+        else {
+            handleNode(n.left, true, true);
+            handleNode(n.right, true, true);
+            if (n.operator == "+") pi(push, 10);
+            else if (n.operator == "-") {
+                // x + (-y)
+                pi(true, 13);
+                pi(push, 10);
+            }
+            else if (n.operator == "*") pi(push, 11);
+            else if (n.operator == ">") pi(push, 14);
+            else if (n.operator == "<=") {
+                // !(x > y)
+                pi(true, 14);
+                pi(push, 13);
+            }
+            else if (n.operator == "==") pi(push, 15);
+            else if (n.operator == "!=") {
+                // !(x == y)
+                pi(true, 15);
+                pi(push, 13);
+            } else {
+                throw new Error("Binary operator " + n.operator + " not supported.");
+            }
+        }
     },
     "VariableDeclaration": function VariableDeclaration(n) {
         n.declarations.forEach(x => handleNode(x));
@@ -181,8 +432,13 @@ var nodeHandlers = {
             if (!push) return;
             handleNode(n.argument, true, true);
             pi(push, 13);
+        } else if (n.operator == "-") {
+            if (!push) return;
+            handleNode(n.argument, true, true);
+            pi(push, 12);
+        } else {
+            throw new Error("Unary operator " + n.operator + " is not supported.");
         }
-        console.error("DBG", n);
     },
     "IfStatement": function IfStatement(n, push) {
         handleNode(n.test, true);
@@ -222,7 +478,7 @@ handleNode(ast);
 
 if (process.argv.includes("-r")) {
     var vm = require("./vm");
-    console.log(vm(codestream));
+    console.log(vm(codestream, undefined, { debug: process.argv.includes("-d") }));
 } else {
     console.log(JSON.stringify(codestream));
 }
