@@ -105,3 +105,6 @@ dist
 
 # lmtp test input
 test.js
+
+# lmtp test output
+code.json
